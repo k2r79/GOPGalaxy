@@ -1,10 +1,10 @@
 module.exports = class Fleet {
 
-    constructor(owner, units, sourcePlanet, destinationPlanet, totalRounds, roundsLeft) {
+    constructor(owner, units, sourcePlanetId, destinationPlanetId, totalRounds, roundsLeft) {
         this.owner = owner;
         this.units = units;
-        this.sourcePlanet = sourcePlanet;
-        this.destinationPlanet = destinationPlanet;
+        this.sourcePlanetId = sourcePlanetId;
+        this.destinationPlanetId = destinationPlanetId;
         this.totalRounds = totalRounds;
         this.roundsLeft = roundsLeft;
     }

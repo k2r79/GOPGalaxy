@@ -15,9 +15,11 @@ router.post('/', function(req, res) {
 
     var game = queryParser.parseBody(req.body);
     gameEngine.computeNextRound(game);
-    console.log(game.jsonResponse());
 
-    res.json(game.jsonResponse());
+    response = game.jsonResponse();
+    console.log(response);
+
+    res.json(response);
 });
 
 app.use('/', router);
