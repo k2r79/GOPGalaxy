@@ -11,4 +11,12 @@ module.exports = class Planet {
         this.type = type;
         this.terraforming = terraforming;
     }
+
+    distanceFrom(x, y) {
+        var xDistance = this.x - x;
+        var yDistance = this.y - y;
+        var distance = xDistance * xDistance + yDistance * yDistance;
+
+        return Math.sqrt(distance);
+    }
 }

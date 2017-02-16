@@ -11,13 +11,13 @@ app.use(bodyParser.json());
 var router = express.Router();
 
 router.post('/', function(req, res) {
-    console.log(req.body);
+    //console.log(req.body);
 
     var game = queryParser.parseBody(req.body);
     gameEngine.computeNextRound(game);
 
     response = game.jsonResponse();
-    console.log(response);
+    // console.log(response);
 
     res.json(response);
 });

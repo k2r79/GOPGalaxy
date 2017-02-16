@@ -23,9 +23,13 @@ module.exports = class Game {
     }
 
     aimedPlanets() {
-        var aimedPlanetIds = this.fleets.map(fleet => fleet.destinationPlanetId)
-            .concat(this.futurFleets.map(fleet => fleet.destinationPlanetId));
+        var aimedPlanetIds = this.fleets.filter(fleet => fleet.owner == 1).map(fleet => fleet.destinationPlanetId)
+            .concat(this.futurFleets.map(fleet => fleet.destinationPlanet.id));
 
         return this.planets.filter(planet => aimedPlanetIds.includes(planet.id));
+    }
+
+    ignoredPlanets() {
+        return this.planets.filter(planet => !this.aimedPlanets().includes(planet));
     }
 }
