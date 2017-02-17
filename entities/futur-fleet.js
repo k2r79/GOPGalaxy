@@ -4,13 +4,14 @@ module.exports = class FuturFleet {
         this.units = units;
         this.sourcePlanet = sourcePlanet;
         this.destinationPlanet = destinationPlanet;
+        this.duration = sourcePlanet.timeTo(destinationPlanet.x, destinationPlanet.y);
     }
 
     jsonResponse() {
         return {
             units: this.units,
-            source: this.sourcePlanet,
-            target: this.destinationPlanet
+            source: this.sourcePlanet.id,
+            target: this.destinationPlanet.id
         }
     }
 }

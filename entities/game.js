@@ -7,6 +7,7 @@ module.exports = class Game {
         this.planets = planets;
         this.fleets = fleets;
         this.futurFleets = [];
+        this.terraformings = [];
     }
 
     jsonResponse() {
@@ -14,7 +15,7 @@ module.exports = class Game {
             fleets: this.futurFleets.map(function(fleet) {
                 return fleet.jsonResponse();
             }),
-            terraformings: []
+            terraformings: this.terraformings.map(planet => planet.id)
         }
     }
 
@@ -31,5 +32,25 @@ module.exports = class Game {
 
     ignoredPlanets() {
         return this.planets.filter(planet => !this.aimedPlanets().includes(planet));
+    }
+
+    fleetsTo(planetId) {
+        return this.fleets
+            .filter(fleet => fleet.destinationPlanetId == planetId);
+    }
+
+    futurFleetsTo(planetId) {
+        return this.futurFleets
+            .filter(fleet => fleet.destinationPlanet.id == planetId);
+    }
+
+    fleetsFrom(planetId) {
+        return this.fleets
+            .filter(fleet => fleet.sourcePlanetId == planetId);
+    }
+
+    futurFleetsFrom(planetId) {
+        return this.futurFleets
+            .filter(fleet => fleet.sourcePlanet.id == planetId);
     }
 }

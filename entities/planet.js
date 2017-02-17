@@ -19,4 +19,8 @@ module.exports = class Planet {
 
         return Math.sqrt(distance);
     }
+
+    timeTo(x, y) {
+        return Math.floor(this.distanceFrom(x, y) / 20);
+    }
 }
