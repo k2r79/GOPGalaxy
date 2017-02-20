@@ -23,4 +23,8 @@ module.exports = class Planet {
     timeTo(x, y) {
         return Math.floor(this.distanceFrom(x, y) / 20);
     }
+
+    terraformable() {
+        return ['H', 'K', 'L'].includes(this.type) && this.terraforming == null;
+    }
 }

@@ -17,7 +17,7 @@ router.post('/', function(req, res) {
     gameEngine.computeNextRound(game);
 
     response = game.jsonResponse();
-    // console.log(response);
+    console.log(response);
 
     res.json(response);
 });

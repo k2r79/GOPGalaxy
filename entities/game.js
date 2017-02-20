@@ -15,7 +15,7 @@ module.exports = class Game {
             fleets: this.futurFleets.map(function(fleet) {
                 return fleet.jsonResponse();
             }),
-            terraformings: this.terraformings.map(planet => planet.id)
+            terraformings: this.terraformings
         }
     }
 
@@ -52,5 +52,11 @@ module.exports = class Game {
     futurFleetsFrom(planetId) {
         return this.futurFleets
             .filter(fleet => fleet.sourcePlanet.id == planetId);
+    }
+
+    isTerraforming(planet) {
+        return this.terraformings
+            .map((terraforming) => terraforming.planet)
+            .includes(planet.id);
     }
 }
