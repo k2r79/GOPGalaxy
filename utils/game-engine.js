@@ -21,7 +21,7 @@ module.exports.computeNextRound = function(game) {
                         unitsToSend = availableUnits;
                     }
 
-                    if (unitsToSend >= fleetSize && opportunity.destinationPlanet.owner != 1) {
+                    if (unitsToSend >= fleetSize && opportunity.destinationPlanet.owner != 1 && opportunity.destinationPlanet.terraforming == null) {
                         opportunity.sourcePlanet.units -= unitsToSend;
 
                         var futurFleet = new FuturFleet(unitsToSend, opportunity.sourcePlanet, opportunity.destinationPlanet);
