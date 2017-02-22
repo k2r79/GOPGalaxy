@@ -34,7 +34,7 @@ module.exports.computeNextRound = function(game) {
                         unitsToSend = availableUnits;
                     }
 
-                    if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet) && opportunity.destinationPlanet.owner != 1) {
+                    if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet)) {
                         opportunity.sourcePlanet.units -= unitsToSend;
 
                         var futurFleet = new FuturFleet(unitsToSend, opportunity.sourcePlanet, opportunity.destinationPlanet);
@@ -69,7 +69,7 @@ function computeNeededUnits(timeToPlanet, planet, game) {
 
     var growth = planet.owner != 0 ? planet.growthRate * timeToPlanet : 0
 
-    return planet.units + growth + fleetUnits + futurFleetUnits + planet.growthRate + unitOffset;
+    return planet.units + growth + fleetUnits + futurFleetUnits + unitOffset;
 }
 
 function computeSurvivalUnits(planet, game) {

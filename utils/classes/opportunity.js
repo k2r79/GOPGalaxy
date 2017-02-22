@@ -11,15 +11,25 @@ module.exports = class Opportunity {
     getInterest() {
         this.interest = 0;
 
-        this.interest -= this.neededUnits / 50;
+        this.interest -= this.neededUnits / 30;
         this.interest -= this.distance / 500;
-        this.interest += this.destinationPlanet.growthRate * 0.75;
+
+        var growthRateBias = this.destinationPlanet.growthRate * 0.75;
+        if (this.destinationPlanet.owner > 1) {
+            this.interest -= growthRateBias;
+        } else {
+            this.interest += growthRateBias;
+        }
 
         if (this.destinationPlanet.owner == 0) {
-            this.interest += 10;
+            this.interest += 15;
+        } else if (this.destinationPlanet.owner == 1) {
+            this.interest -= 10;
         } else if (this.destinationPlanet.owner == 1 && this.neededUnits > 0) {
             this.interest += 20;
         }
+
+        console.log("Planet " + this.destinationPlanet.id + "(" + this.destinationPlanet.owner + ") interest : " + this.interest)
 
         return this.interest;
     }
