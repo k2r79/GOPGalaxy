@@ -11,25 +11,37 @@ module.exports = class Opportunity {
     getInterest() {
         this.interest = 0;
 
-        this.interest -= this.neededUnits / 30;
-        this.interest -= this.distance / 500;
+        this.interest -= this.neededUnits / 20;
+        this.interest -= this.distance / 80;
 
-        var growthRateBias = this.destinationPlanet.growthRate * 0.75;
-        if (this.destinationPlanet.owner > 1) {
-            this.interest -= growthRateBias;
-        } else {
-            this.interest += growthRateBias;
+        if (this.destinationPlanet.owner == 1) {
+            if (this.neededUnits - this.destinationPlanet.growthRate * this.sourcePlanet.timeTo(this.destinationPlanet) > 0) {
+                this.interest = Infinity;
+            } else {
+                this.interest = - Infinity;
+            }
+
+            if (this.destinationPlanet.units == this.destinationPlanet.maxUnits) {
+                this.interest = - Infinity;
+            }
         }
 
-        if (this.destinationPlanet.owner == 0) {
-            this.interest += 15;
-        } else if (this.destinationPlanet.owner == 1) {
-            this.interest -= 10;
-        } else if (this.destinationPlanet.owner == 1 && this.neededUnits > 0) {
-            this.interest += 20;
-        }
+        // var growthRateBias = this.destinationPlanet.growthRate * 0.75;
+        // if (this.destinationPlanet.owner > 1) {
+        //     this.interest -= growthRateBias;
+        // } else {
+        //     this.interest += growthRateBias;
+        // }
 
-        console.log("Planet " + this.destinationPlanet.id + "(" + this.destinationPlanet.owner + ") interest : " + this.interest)
+        // if (this.destinationPlanet.owner == 0) {
+        //     this.interest += 15;
+        // } else if (this.destinationPlanet.owner == 1) {
+        //     this.interest -= 10;
+        // } else if (this.destinationPlanet.owner == 1 && this.neededUnits > 0) {
+        //     this.interest += 20;
+        // }
+
+        console.log("Planet " + this.destinationPlanet.id + " | Owner : " + this.destinationPlanet.owner + " | Needed : " + this.neededUnits + " | Interest : " + this.interest)
 
         return this.interest;
     }

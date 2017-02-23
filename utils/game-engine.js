@@ -1,7 +1,6 @@
 var Opportunity = require('./classes/opportunity');
 var FuturFleet = require('../entities/futur-fleet');
 
-var minUnits = 1;
 var unitOffset = 1;
 var fleetSize = 3;
 
@@ -26,7 +25,7 @@ module.exports.computeNextRound = function(game) {
                     // console.log(opportunity.neededUnits + "," + opportunity.distance + "," + opportunity.destinationPlanet.growthRate + "," + opportunity.destinationPlanet.owner + "," + opportunity.interest);
 
                     var survivalUnits = computeSurvivalUnits(opportunity.sourcePlanet, game);
-                    var availableUnits = opportunity.sourcePlanet.units - survivalUnits - minUnits;
+                    var availableUnits = opportunity.sourcePlanet.units - survivalUnits;
                     var unitsToSend = opportunity.neededUnits;
 
                     // console.log("Survival : " + survivalUnits + " | Available : " + availableUnits + " | Needed : " + unitsToSend);
@@ -34,11 +33,12 @@ module.exports.computeNextRound = function(game) {
                         unitsToSend = availableUnits;
                     }
 
-                    if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet)) {
-                        opportunity.sourcePlanet.units -= unitsToSend;
+                    if (unitsToSend < fleetSize && availableUnits > fleetSize) {
+                        unitsToSend = fleetSize;
+                    }
 
-                        var futurFleet = new FuturFleet(unitsToSend, opportunity.sourcePlanet, opportunity.destinationPlanet);
-                        game.futurFleets.push(futurFleet);
+                    if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet)) {
+                        sendUnits(unitsToSend, opportunity, game);
                     }
                 });
         });
@@ -48,10 +48,18 @@ function computeNeededUnits(timeToPlanet, planet, game) {
     var fleetUnits = game.fleetsTo(planet.id)
         .filter(fleet => fleet.roundsLeft <= timeToPlanet)
         .reduce(function(i, fleet) {
-            if (fleet.owner == planet.owner) {
-                return i + fleet.units;
+            if (planet.owner == 1) {
+                if (fleet.owner == 1) {
+                    return i - fleet.units;
+                } else {
+                    return i + fleet.units;
+                }
             } else {
-                return i - fleet.units;
+                if (fleet.owner == planet.owner) {
+                    return i + fleet.units;
+                } else {
+                    return i - fleet.units;
+                }
             }
         }, 0);
 
@@ -64,8 +72,8 @@ function computeNeededUnits(timeToPlanet, planet, game) {
             }
         }, 0);
 
-    futurFleetUnits += game.futurFleetsFrom(planet.id)
-        .reduce((i, fleet) => i - fleet.units, 0);
+    // futurFleetUnits += game.futurFleetsFrom(planet.id)
+    //     .reduce((i, fleet) => i - fleet.units, 0);
 
     var growth = planet.owner != 0 ? planet.growthRate * timeToPlanet : 0
 
@@ -84,5 +92,12 @@ function computeSurvivalUnits(planet, game) {
         var growth = planet.growthRate
     }
 
-    return fleetUnits - growth;
+    return 1 + fleetUnits - growth;
+}
+
+function sendUnits(units, opportunity, game) {
+    opportunity.sourcePlanet.units -= units;
+
+    var futurFleet = new FuturFleet(units, opportunity.sourcePlanet, opportunity.destinationPlanet);
+    game.futurFleets.push(futurFleet);
 }
