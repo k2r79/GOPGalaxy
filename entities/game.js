@@ -59,4 +59,9 @@ module.exports = class Game {
             .map((terraforming) => terraforming.planet)
             .includes(planet.id);
     }
+
+    supportPlanets() {
+        return this.futurFleets
+            .filter(fleet => fleet.sourcePlanet.owner == 1 && fleet.destinationPlanet.owner == 1);
+    }
 }

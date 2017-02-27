@@ -1,9 +1,10 @@
 module.exports = class Opportunity {
 
-    constructor(sourcePlanet, destinationPlanet, neededUnits) {
+    constructor(sourcePlanet, destinationPlanet, neededUnits, turn) {
         this.sourcePlanet = sourcePlanet;
         this.destinationPlanet = destinationPlanet;
         this.neededUnits = neededUnits;
+        this.turn = turn;
         this.distance = this.sourcePlanet.distanceFrom(this.destinationPlanet.x, this.destinationPlanet.y);
         this.interest = 0;
     }
@@ -14,14 +15,12 @@ module.exports = class Opportunity {
         this.interest -= this.neededUnits / 20;
         this.interest -= this.distance / 80;
 
+
         if (this.destinationPlanet.owner == 1) {
-            if (this.neededUnits - this.destinationPlanet.growthRate * this.sourcePlanet.timeTo(this.destinationPlanet) > 0) {
+            var missingUnits = this.neededUnits - this.destinationPlanet.growthRate * this.sourcePlanet.timeTo(this.destinationPlanet.x, this.destinationPlanet.y);
+            if (missingUnits > 0 && missingUnits <= this.destinationPlanet.maxUnits) {
                 this.interest = Infinity;
             } else {
-                this.interest = - Infinity;
-            }
-
-            if (this.destinationPlanet.units == this.destinationPlanet.maxUnits) {
                 this.interest = - Infinity;
             }
         }
@@ -41,8 +40,12 @@ module.exports = class Opportunity {
         //     this.interest += 20;
         // }
 
-        console.log("Planet " + this.destinationPlanet.id + " | Owner : " + this.destinationPlanet.owner + " | Needed : " + this.neededUnits + " | Interest : " + this.interest)
+        console.log("Planet " + this.destinationPlanet.id + " | Distance : " + this.distance + " | Owner : " + this.destinationPlanet.owner + " | Needed : " + this.neededUnits + " | Interest : " + this.interest)
 
         return this.interest;
+    }
+
+    isSupportFleet() {
+        return this.sourcePlanet.owner == 1 && this.destinationPlanet.owner == 1;
     }
 };
