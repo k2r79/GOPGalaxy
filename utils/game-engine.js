@@ -1,11 +1,13 @@
 var Graph = require('./classes/graph').Graph;
 var Edge = require('./classes/graph').Edge;
+var Node = require('./classes/graph').Node;
 var Opportunity = require('./classes/opportunity');
 var FuturFleet = require('../entities/futur-fleet');
 
 module.exports = class GameEngine {
     constructor(game) {
         this.graph = this.buildGraph(game.planets);
+        this.coveringGraph = this.buildCoveringGraph(this.graph, game.planets.find(p => p.owner == 1).id);
         this.unitOffset = 1;
         this.fleetSize = 3;
     }
@@ -53,31 +55,56 @@ module.exports = class GameEngine {
     }
 
     buildGraph(planets) {
-        var processedPlanets = [];
+        var nodes = planets.map(p => new Node(p));
+
         var edges = planets.map(planet => {
+                var currentNode = nodes.find(n => n.id == planet.id);
+
                 var e = planets.filter(p => p.id != planet.id)
                     .map(p => {
-                        if (processedPlanets.includes(p.id)) {
+                        var secondNode = nodes.find(n => n.id == p.id);
+                        if (secondNode.processed) {
                             return undefined;
                         }
 
-                        return new Edge([ planet.id, p.id ], planet.distanceFrom(p.x, p.y));
+                        return new Edge([ currentNode.id, secondNode.id ], planet.distanceFrom(p.x, p.y));
                     }).filter(e => e);
 
-                processedPlanets.push(planet.id);
+                currentNode.processed = true;
 
                 return e;
             })
             .reduce((x, y) => x.concat(y), []);
 
-        return new Graph(edges);
+        return new Graph(nodes, edges);
     }
 
-    kruskalThisShitMan() {
-        var lightestVertice = this.graph.vertices
-            .sort((v1, v2) => v2.weight - v1.weight)[0];
+    buildCoveringGraph(graph, startPlanetId) {
+        var edges = [];
 
+        graph.reset();
+        var startNode = graph.nodeWithId(startPlanetId);
+        startNode.processed = true;
 
+        var lightestEdge = (graph) => {
+            return graph.edges
+                .filter(e => {
+                    var firstNode = graph.nodeWithId(e.nodeIds[0]);
+                    var secondNode = graph.nodeWithId(e.nodeIds[1]);
+
+                    return (firstNode.processed && !secondNode.processed) || (!firstNode.processed && secondNode.processed);
+                })
+                .sort((e1, e2) => e1.weight - e2.weight)[0];
+        }
+
+        while (!graph.nodes.every(n => n.processed)) {
+            var selectedEdge = lightestEdge(graph);
+            selectedEdge.nodeIds.map(i => graph.nodeWithId(i)).find(n => !n.processed).processed = true;
+
+            edges.push(selectedEdge);
+        }
+
+        return new Graph(graph.nodes, edges);
     }
 
     computeNeededUnits(timeToPlanet, planet, game) {
