@@ -168,22 +168,16 @@ module.exports = class GameEngine {
         // futurFleetUnits += game.futurFleetsFrom(planet.id)
         //     .reduce((i, fleet) => i - fleet.units, 0);
 
-<<<<<<< HEAD
-    var growth = 0
-    if (planet.owner != 0) {
-        growth = planet.growthRate * timeToPlanet
-    } else if (planet.owner == 1) {
-        growth = -planet.growthRate * timeToPlanet;
-    }
-    
-    return planet.units + growth + fleetUnits + futurFleetUnits + unitOffset;
-}
-=======
-        var growth = planet.owner != 0 ? planet.growthRate * timeToPlanet : 0
 
-        return planet.units + growth + fleetUnits + futurFleetUnits + this.unitOffset;
+        var growth = 0
+        if (planet.owner != 0) {
+            growth = planet.growthRate * timeToPlanet
+        } else if (planet.owner == 1) {
+            growth = -planet.growthRate * timeToPlanet;
+        }
+        
+        return planet.units + growth + fleetUnits + futurFleetUnits + unitOffset;
     }
->>>>>>> 7591cf3b015b44e779fac10e683e0000f02d028c
 
     computeSurvivalUnits(planet, game) {
         var fleetUnits = game.fleetsTo(planet.id)
