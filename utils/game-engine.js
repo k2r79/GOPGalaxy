@@ -16,42 +16,72 @@ module.exports = class GameEngine {
         var self = this;
 
         game.ownedPlanets()
-            .filter(planet => planet.terraformable())
-            .forEach(function(planet) {
-                if (planet.growthRate < 3 && (game.maxTurns - game.turn > planet.growthRate * 2 + 20)) {
-                    console.log("terraforming planet " + planet.id)
-                    game.terraformings.push({ planet: planet.id });
-                }
+            .map(p => [ p, self.coveringGraph.edgesFor(p.id) ])
+            .filter(e => e[1] != null)
+            .forEach((e) => {
+                var sourcePlanet = e[0];
+                e[1].forEach((edge) => {
+                    var destinationPlanet = self.graph.nodeWithId(edge.otherId(sourcePlanet.id)).planet;
+
+                    console.log(edge);
+
+                    var neededUnits = self.computeNeededUnits(sourcePlanet.timeTo(destinationPlanet.x, destinationPlanet.y), sourcePlanet, game)
+                    var survivalUnits = 0;// self.computeSurvivalUnits(sourcePlanet, game);
+                    var availableUnits = sourcePlanet.units - survivalUnits;
+                    var unitsToSend = neededUnits;
+
+                    // console.log("Survival : " + survivalUnits + " | Available : " + availableUnits + " | Needed : " + unitsToSend);
+                    if (neededUnits > availableUnits) {
+                        unitsToSend = availableUnits;
+                    }
+
+                    if (unitsToSend < self.fleetSize && availableUnits > self.fleetSize) {
+                        unitsToSend = self.fleetSize;
+                    }
+
+                    if (unitsToSend >= self.fleetSize && !game.isTerraforming(sourcePlanet) && destinationPlanet.owner != 1) {
+                        this.sendUnits(unitsToSend, sourcePlanet, destinationPlanet, game);
+                    }
+                });
             });
 
-        var maxSupportPlanets = Math.floor(game.ownedPlanets().length / 2);
-        game.ownedPlanets()
-            .forEach(function(sourcePlanet) {
-                game.planets
-                    .filter(planet => planet.id != sourcePlanet.id)
-                    .map(planet => new Opportunity(sourcePlanet, planet, self.computeNeededUnits(sourcePlanet.timeTo(planet.x, planet.y), planet, game), game.turn))
-                    .sort((o1, o2) => o2.getInterest() - o1.getInterest())
-                    .forEach(function(opportunity) {
-                        // console.log(opportunity.neededUnits + "," + opportunity.distance + "," + opportunity.destinationPlanet.growthRate + "," + opportunity.destinationPlanet.owner + "," + opportunity.interest);
-
-                        var survivalUnits = self.computeSurvivalUnits(opportunity.sourcePlanet, game);
-                        var availableUnits = opportunity.sourcePlanet.units - survivalUnits;
-                        var unitsToSend = opportunity.neededUnits;
-
-                        // console.log("Survival : " + survivalUnits + " | Available : " + availableUnits + " | Needed : " + unitsToSend);
-                        if (opportunity.neededUnits > availableUnits) {
-                            unitsToSend = availableUnits;
-                        }
-
-                        if (unitsToSend < fleetSize && availableUnits > fleetSize) {
-                            unitsToSend = fleetSize;
-                        }
-
-                        if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet) && (!opportunity.isSupportFleet() || (opportunity.isSupportFleet() && game.supportPlanets().length <= maxSupportPlanets))) {
-                            this.sendUnits(unitsToSend, opportunity, game);
-                        }
-                    });
-            });
+        // game.ownedPlanets()
+        //     .filter(planet => planet.terraformable())
+        //     .forEach(function(planet) {
+        //         if (planet.growthRate < 3 && (game.maxTurns - game.turn > planet.growthRate * 2 + 20)) {
+        //             console.log("terraforming planet " + planet.id)
+        //             game.terraformings.push({ planet: planet.id });
+        //         }
+        //     });
+        //
+        // var maxSupportPlanets = Math.floor(game.ownedPlanets().length / 2);
+        // game.ownedPlanets()
+        //     .forEach(function(sourcePlanet) {
+        //         game.planets
+        //             .filter(planet => planet.id != sourcePlanet.id)
+        //             .map(planet => new Opportunity(sourcePlanet, planet, self.computeNeededUnits(sourcePlanet.timeTo(planet.x, planet.y), planet, game), game.turn))
+        //             .sort((o1, o2) => o2.getInterest() - o1.getInterest())
+        //             .forEach(function(opportunity) {
+        //                 // console.log(opportunity.neededUnits + "," + opportunity.distance + "," + opportunity.destinationPlanet.growthRate + "," + opportunity.destinationPlanet.owner + "," + opportunity.interest);
+        //
+        //                 var survivalUnits = self.computeSurvivalUnits(opportunity.sourcePlanet, game);
+        //                 var availableUnits = opportunity.sourcePlanet.units - survivalUnits;
+        //                 var unitsToSend = opportunity.neededUnits;
+        //
+        //                 // console.log("Survival : " + survivalUnits + " | Available : " + availableUnits + " | Needed : " + unitsToSend);
+        //                 if (opportunity.neededUnits > availableUnits) {
+        //                     unitsToSend = availableUnits;
+        //                 }
+        //
+        //                 if (unitsToSend < fleetSize && availableUnits > fleetSize) {
+        //                     unitsToSend = fleetSize;
+        //                 }
+        //
+        //                 if (unitsToSend >= fleetSize && !game.isTerraforming(opportunity.sourcePlanet) && (!opportunity.isSupportFleet() || (opportunity.isSupportFleet() && game.supportPlanets().length <= maxSupportPlanets))) {
+        //                     this.sendUnits(unitsToSend, opportunity, game);
+        //                 }
+        //             });
+        //     });
     }
 
     buildGraph(planets) {
@@ -140,7 +170,7 @@ module.exports = class GameEngine {
 
         var growth = planet.owner != 0 ? planet.growthRate * timeToPlanet : 0
 
-        return planet.units + growth + fleetUnits + futurFleetUnits + unitOffset;
+        return planet.units + growth + fleetUnits + futurFleetUnits + this.unitOffset;
     }
 
     computeSurvivalUnits(planet, game) {
@@ -158,10 +188,10 @@ module.exports = class GameEngine {
         return 1 + fleetUnits - growth;
     }
 
-    sendUnits(units, opportunity, game) {
-        opportunity.sourcePlanet.units -= units;
+    sendUnits(units, sourcePlanet, destinationPlanet, game) {
+        sourcePlanet.units -= units;
 
-        var futurFleet = new FuturFleet(units, opportunity.sourcePlanet, opportunity.destinationPlanet);
+        var futurFleet = new FuturFleet(units, sourcePlanet, destinationPlanet);
         game.futurFleets.push(futurFleet);
     }
 };

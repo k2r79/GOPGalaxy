@@ -19,7 +19,7 @@ router.post('/', function(req, res) {
     writeToFile("queries-" + game.id + ".json", JSON.stringify(req.body));
 
     var gameEngine = new GameEngine(game);
-    // gameEngine.computeNextRound(game);
+    gameEngine.computeNextRound(game);
 
     response = game.jsonResponse();
     writeToFile("responses-" + game.id + ".json", JSON.stringify(response));
