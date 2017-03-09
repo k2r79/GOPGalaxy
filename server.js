@@ -3,7 +3,7 @@ var app        = express();
 var bodyParser = require('body-parser');
 
 var queryParser = require('./utils/query-parser');
-var gameEngine = require('./utils/game-engine');
+var GameEngine = require('./utils/game-engine');
 
 var fs = require('fs');
 
@@ -18,6 +18,7 @@ router.post('/', function(req, res) {
     var game = queryParser.parseBody(req.body);
     writeToFile("queries-" + game.id + ".json", JSON.stringify(req.body));
 
+    var gameEngine = new GameEngine(game);
     gameEngine.computeNextRound(game);
 
     response = game.jsonResponse();
