@@ -14,6 +14,10 @@ module.exports = class Opportunity {
         this.interest -= this.neededUnits / 20;
         this.interest -= this.distance / 80;
 
+        if (this.neededUnits < 0) {
+            this.interest = - Infinity;
+        }
+
         if (this.destinationPlanet.owner == 1) {
             if (this.neededUnits - this.destinationPlanet.growthRate * this.sourcePlanet.timeTo(this.destinationPlanet) > 0) {
                 this.interest = Infinity;

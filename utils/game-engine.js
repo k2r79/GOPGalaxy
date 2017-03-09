@@ -75,8 +75,13 @@ function computeNeededUnits(timeToPlanet, planet, game) {
     // futurFleetUnits += game.futurFleetsFrom(planet.id)
     //     .reduce((i, fleet) => i - fleet.units, 0);
 
-    var growth = planet.owner != 0 ? planet.growthRate * timeToPlanet : 0
-
+    var growth = 0
+    if (planet.owner != 0) {
+        growth = planet.growthRate * timeToPlanet
+    } else if (planet.owner == 1) {
+        growth = -planet.growthRate * timeToPlanet;
+    }
+    
     return planet.units + growth + fleetUnits + futurFleetUnits + unitOffset;
 }
 
