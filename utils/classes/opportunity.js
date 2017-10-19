@@ -11,8 +11,13 @@ module.exports = class Opportunity {
     getInterest() {
         this.interest = 0;
 
-        this.interest -= this.neededUnits / 20;
-        this.interest -= this.distance / 80;
+        this.interest -= this.neededUnits / 10;
+
+        if (this.destinationPlanet.owner != 0) {
+            this.interest -= this.distance / 85;
+        } else {
+            this.interest -= this.distance / 130;
+        }
 
         if (this.neededUnits < 0) {
             this.interest = - Infinity;
